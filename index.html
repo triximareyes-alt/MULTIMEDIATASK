@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multimedia Tasks – October</title>
+<style>
+:root{--bg:#fff7ed;--card:#fff;--ink:#2b1d14;--mut:#8a7565;--acc:#f97316;--ok:#16a34a;--bad:#dc2626;--line:#f3e3d3}
+@media(prefers-color-scheme:dark){:root{--bg:#1b130e;--card:#2a1f18;--ink:#fdf0e3;--mut:#b49c88;--line:#3d2d22}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink);padding:16px;max-width:720px;margin:auto}
+header{background:linear-gradient(135deg,#f97316,#ec4899);color:#fff;border-radius:20px;padding:22px;margin-bottom:14px}
+h1{margin:0;font-size:1.6rem}header p{margin:4px 0 14px;opacity:.9}
+.bar{height:10px;background:rgba(255,255,255,.3);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#fff;transition:width .4s}
+#pt{font-size:.85rem;margin-top:6px}
+.tabs,.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+button{font:inherit;cursor:pointer}
+.chip{border:2px solid var(--line);background:var(--card);color:var(--ink);padding:7px 14px;border-radius:99px;white-space:nowrap;font-weight:600}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+h2{font-size:1rem;margin:18px 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;transition:.2s}
+.card.hide{display:none}
+.card.done{opacity:.5}.card.done .t{text-decoration:line-through}
+.card input{width:26px;height:26px;accent-color:var(--ok);flex:none;margin-top:2px}
+.b{flex:1}.t{font-weight:700}
+.ppl{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.p{font-size:.78rem;background:var(--bg);border:1px solid var(--line);padding:3px 9px;border-radius:99px}
+.p b{color:var(--acc)}
+.note{font-size:.82rem;color:var(--mut);margin-top:6px}
+.due{font-size:.75rem;font-weight:700;padding:4px 9px;border-radius:99px;background:#fed7aa;color:#7c2d12;white-space:nowrap}
+.due.late{background:#fecaca;color:#7f1d1d}.due.soon{background:#fde68a;color:#78350f}.due.ok{background:#bbf7d0;color:#14532d}
+.verse{font-style:italic;border-left:3px solid var(--acc);padding-left:8px;margin-top:6px;font-size:.85rem}
+.empty{text-align:center;color:var(--mut);padding:20px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Multimedia Tasks</h1>
+  <p>October To-Do · tap a name to see only your tasks, tick when done ✅ (shared with everyone)</p>
+  <div class="bar"><i id="fill"></i></div><div id="pt"></div>
+</header>
+
+<div class="chips" id="chips"></div>
+<div id="list"></div>
+<div class="empty" id="empty">No tasks for this person 🎉</div>
+
+<script>
+const Y=2026,M=9; // October 2026
+const d=n=>new Date(Y,M,n);
+const S=[
+{h:"Every Week · Services",items:[
+ {id:"s1",t:"1st Service",w:[["Back up pics","Trix"],["Pics edit","Hil"],["Caption","Jess"]],due:"Thursday morning"},
+ {id:"s2",t:"2nd Service",w:[["Back up pics","Trix"],["Pics edit","Hil"],["Caption","Jess"]],due:"Thursday morning"}]},
+{h:"🎂 Birthday Celebrants",note:"Deadline: 2 days before the birthday",items:[
+ {id:"b1",t:"Kim · Oct 4",w:[["Caption","Megs"],["Edit","Hubz"]],date:d(2)},
+ {id:"b2",t:"Ptr. Aura · Oct 10",w:[["Caption","Hil"],["Edit","Hubz"]],date:d(8)},
+ {id:"b3",t:"Kuya Prince · Oct 24",w:[["Caption","Hil"],["Edit","Hubz"]],date:d(22)},
+ {id:"b4",t:"Amiel · Oct 29",w:[["Caption","Jess"],["Edit","Hubz"]],date:d(27)}]},
+{h:"📌 October Activities",items:[
+ {id:"a1",t:"Gathering of video greetings for Pastora",w:[["Gather","Trix"],["Video edit","Hubz"]],date:d(4),dl:"1st Sunday of Oct"},
+ {id:"a4",t:"Ref magnet design – gift for church leaders",w:[["Design","Eula"],["Design","Trix"]],date:d(7),verse:"1 Corinthians 15:58"},
+ {id:"a3",t:"Birthday poster for Pastora (Oct 10)",w:[["Poster","Hubz"]],date:d(8)},
+ {id:"a5",t:"Wedding/Bridal shower photobook – finalize pages & layout",w:[["Layout","Trix"],["Layout","Eula"]],date:d(9),note:"⚠️ Need pics of the praise team!"},
+ {id:"a2a",t:"Final video: Pastor's Day",w:[["Video edit","Hubz"],["Caption","Eula"]],date:d(16)},
+ {id:"a2b",t:"Final video: Wedding Shower",w:[["Video edit","Trix"]],date:d(16)},
+ {id:"a6",t:"Pastor's Day poster",w:[["Poster","Hubz"],["Caption","Jess"]]}]},
+{h:"✝️ Crusade",items:[
+ {id:"c1",t:"Ayusin ang church map",w:[["Map","Hubz"]]},
+ {id:"c2",t:"Crusade poster",w:[["Poster","TBA"]]},
+ {id:"c3",t:"Magprint ng stub",w:[["Print","Trix"],["Print","Eula"]]},
+ {id:"c4",t:"Magtetext",w:[["Text","Trix"]]}]}
+];
+const people=["Gab","Hil","Jess","Hubz","Trix","Eula","Megs"];
+const API="https://script.google.com/macros/s/AKfycbxYDqIRXrRGWrVSiNUFGQ2hPltHTIMQUfeFNeBcbRHnF1TPMUHDEHq3RPXa8zRJ3kATFQ/exec";
+let sel="All",st={},lastEdit=0;
+try{st=JSON.parse(localStorage.getItem("mm-oct")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("mm-oct",JSON.stringify(st))}catch(e){}};
+function tog(id,v){
+ st[id]=v;lastEdit=Date.now();save();render();
+ fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain"},body:JSON.stringify({id:id,done:v})}).catch(()=>{});
+}
+function sync(){
+ if(Date.now()-lastEdit<5000)return;
+ fetch(API).then(r=>r.json()).then(d=>{st=Object.assign({},st,d);save();render();}).catch(()=>{});
+}
+const fmt=x=>x.toLocaleDateString("en",{month:"short",day:"numeric"});
+function badge(i){
+ if(!i.date)return `<span class="due">${i.due||"No date set"}</span>`;
+ const t=new Date();t.setHours(0,0,0,0);const n=Math.round((i.date-t)/864e5);
+ const c=n<0?"late":n<=2?"soon":"ok";
+ const txt=n<0?`${-n}d overdue`:n==0?"Today!":n==1?"Tomorrow":`${n} days left`;
+ return `<span class="due ${c}">${fmt(i.date)} · ${txt}</span>`;
+}
+function render(){
+ document.getElementById("chips").innerHTML=["All",...people].map(p=>`<button class="chip ${p==sel?"on":""}" onclick="sel='${p}';render()">${p=="All"?"👥 All":p}</button>`).join("");
+ let h="",tot=0,dn=0,shown=0;
+ S.forEach(s=>{
+  let c="";
+  s.items.forEach(i=>{
+   const mine=sel=="All"||i.w.some(x=>x[1]==sel);
+   tot++;if(st[i.id])dn++;
+   if(!mine)return;shown++;
+   c+=`<div class="card ${st[i.id]?"done":""}"><input type="checkbox" ${st[i.id]?"checked":""} onchange="tog('${i.id}',this.checked)">
+   <div class="b"><div class="t">${i.t}</div>
+   <div class="ppl">${i.w.map(x=>`<span class="p">${x[0]}: <b>${x[1]}</b></span>`).join("")}</div>
+   ${i.verse?`<div class="verse">📖 ${i.verse}</div>`:""}${i.note?`<div class="note">${i.note}</div>`:""}</div>${badge(i)}</div>`;
+  });
+  if(c)h+=`<h2>${s.h}</h2>${s.note?`<div class="note" style="margin:-4px 0 8px">${s.note}</div>`:""}${c}`;
+ });
+ document.getElementById("list").innerHTML=h;
+ document.getElementById("empty").style.display=shown?"none":"block";
+ document.getElementById("fill").style.width=(dn/tot*100)+"%";
+ document.getElementById("pt").textContent=`${dn} of ${tot} done`;
+}
+render();sync();setInterval(sync,8000);
+</script>
+</body>
+</html>
